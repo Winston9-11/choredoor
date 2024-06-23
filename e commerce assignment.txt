@@ -1,0 +1,267 @@
+const inquirer = require('inquirer');
+
+// Database
+const products = [];
+const categories = [];
+const users = [];
+const carts = [];
+const orders = [];
+
+// Models
+class Product {
+  constructor(id, name, price, category) {
+    this.id = id;
+    this.name = name;
+    this.price = price;
+    this.category = category;
+  }
+}
+
+class Electronics extends Product {
+  constructor(id, name, price, category, warranty) {
+    super(id, name, price, category);
+    this.warranty = warranty;
+  }
+}
+
+class Clothing extends Product {
+  constructor(id, name, price, category, size) {
+    super(id, name, price, category);
+    this.size = size;
+  }
+}
+
+class Category {
+  constructor(id, name) {
+    this.id = id;
+    this.name = name;
+  }
+}
+
+class User {
+  #password;
+
+  constructor(id, username, email, password) {
+    this.id = id;
+    this.username = username;
+    this.email = email;
+    this.#password = password;
+  }
+
+  checkPassword(password) {
+    return this.#password === password;
+  }
+}
+
+class Cart {
+  constructor(userId) {
+    this.userId = userId;
+    this.items = [];
+  }
+
+  addProduct(product, quantity) {
+    this.items.push({ product, quantity });
+  }
+
+  removeProduct(productId) {
+    this.items = this.items.filter(item => item.product.id !== productId);
+  }
+
+  getTotal() {
+    return this.items.reduce((total, item) => total + item.product.price * item.quantity, 0);
+  }
+}
+
+class Order {
+  constructor(id, userId, items, total, paymentMethod) {
+    this.id = id;
+    this.userId = userId;
+    this.items = items;
+    this.total = total;
+    this.paymentMethod = paymentMethod;
+  }
+}
+
+class Payment {
+  processPayment(amount) {
+    throw new Error("This method must be overridden!");
+  }
+}
+
+class CreditCard extends Payment {
+  processPayment(amount) {
+    console.log(`Processing credit card payment for amount: $${amount}`);
+  }
+}
+
+class PayPal extends Payment {
+  processPayment(amount) {
+    console.log(`Processing PayPal payment for amount: $${amount}`);
+  }
+}
+
+// Cart operations
+const createCart = (userId) => {
+  const cart = new Cart(userId);
+  carts.push(cart);
+  return cart;
+};
+
+const getCartByUserId = (userId) => {
+  return carts.find(cart => cart.userId === userId);
+};
+
+// Order operations
+const createOrder = (userId, items, total, paymentMethod) => {
+  const order = new Order(orders.length + 1, userId, items, total, paymentMethod);
+  orders.push(order);
+  return order;
+};
+
+// Main Program
+const main = async () => {
+  let exit = false;
+
+  while (!exit) {
+    const { action } = await inquirer.prompt({
+      type: 'list',
+      name: 'action',
+      message: 'What do you want to do?',
+      choices: [
+        'Add Product',
+        'List Products',
+        'Add User',
+        'List Users',
+        'Create Order',
+        'Exit'
+      ]
+    });
+
+    switch (action) {
+      case 'Add Product':
+        await addProduct();
+        break;
+      case 'List Products':
+        listProducts();
+        break;
+      case 'Add User':
+        await addUser();
+        break;
+      case 'List Users':
+        listUsers();
+        break;
+      case 'Create Order':
+        await createOrderPrompt();
+        break;
+      case 'Exit':
+        exit = true;
+        break;
+    }
+  }
+};
+
+const addProduct = async () => {
+  const product = await inquirer.prompt([
+    { type: 'input', name: 'name', message: 'Product Name:' },
+    { type: 'number', name: 'price', message: 'Product Price:' },
+    { type: 'input', name: 'category', message: 'Product Category:' },
+    { type: 'input', name: 'type', message: 'Product Type (Electronics/Clothing):' }
+  ]);
+
+  const category = categories.find(cat => cat.name === product.category) ||
+    new Category(categories.length + 1, product.category);
+  if (!categories.includes(category)) categories.push(category);
+
+  let newProduct;
+  if (product.type === 'Electronics') {
+    const { warranty } = await inquirer.prompt({ type: 'input', name: 'warranty', message: 'Warranty:' });
+    newProduct = new Electronics(products.length + 1, product.name, product.price, category, warranty);
+  } else if (product.type === 'Clothing') {
+    const { size } = await inquirer.prompt({ type: 'input', name: 'size', message: 'Size:' });
+    newProduct = new Clothing(products.length + 1, product.name, product.price, category, size);
+  } else {
+    newProduct = new Product(products.length + 1, product.name, product.price, category);
+  }
+
+  products.push(newProduct);
+  console.log('Product added successfully.');
+};
+
+const listProducts = () => {
+  console.log('Products:');
+  products.forEach(product => {
+    console.log(`ID: ${product.id}, Name: ${product.name}, Price: ${product.price}, Category: ${product.category.name}`);
+  });
+};
+
+const addUser = async () => {
+  const user = await inquirer.prompt([
+    { type: 'input', name: 'username', message: 'Username:' },
+    { type: 'input', name: 'email', message: 'Email:' },
+    { type: 'password', name: 'password', message: 'Password:' }
+  ]);
+  users.push(new User(users.length + 1, user.username, user.email, user.password));
+  console.log('User added successfully.');
+};
+
+const listUsers = () => {
+  console.log('Users:');
+  users.forEach(user => {
+    console.log(`ID: ${user.id}, Username: ${user.username}, Email: ${user.email}`);
+  });
+};
+
+const createOrderPrompt = async () => {
+  const user = await inquirer.prompt([
+    { type: 'input', name: 'userId', message: 'User ID:' }
+  ]);
+
+  const userId = parseInt(user.userId);
+  const userCart = getCartByUserId(userId) || createCart(userId);
+
+  const { action } = await inquirer.prompt({
+    type: 'list',
+    name: 'action',
+    message: 'Add product to cart or Checkout?',
+    choices: ['Add Product', 'Checkout']
+  });
+
+  if (action === 'Add Product') {
+    const product = await inquirer.prompt([
+      { type: 'input', name: 'productId', message: 'Product ID:' },
+      { type: 'number', name: 'quantity', message: 'Quantity:' }
+    ]);
+
+    const productId = parseInt(product.productId);
+    const quantity = parseInt(product.quantity);
+    const productItem = products.find(p => p.id === productId);
+
+    if (productItem) {
+      userCart.addProduct(productItem, quantity);
+      console.log('Product added to cart.');
+    } else {
+      console.log('Invalid Product ID.');
+    }
+  } else if (action === 'Checkout') {
+    const total = userCart.getTotal();
+    const { paymentMethod } = await inquirer.prompt({
+      type: 'list',
+      name: 'paymentMethod',
+      message: 'Select payment method:',
+      choices: ['CreditCard', 'PayPal']
+    });
+
+    let payment;
+    if (paymentMethod === 'CreditCard') {
+      payment = new CreditCard();
+    } else if (paymentMethod === 'PayPal') {
+      payment = new PayPal();
+    }
+
+    payment.processPayment(total);
+    createOrder(userId, userCart.items, total, paymentMethod);
+    console.log('Order placed successfully.');
+  }
+};
+
+main();
