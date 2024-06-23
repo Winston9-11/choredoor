@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Utility Methods</title>
+</head>
+<body>
+    <h1>Math Utility Methods</h1>
+
+    <h2>Results:</h2>
+    <p id="minResult"></p>
+    <p id="maxResult"></p>
+    <p id="absResult"></p>
+
+    <script>
+        // Method to find the minimum of three numbers
+        function findMinimum(a, b, c) {
+            return Math.min(a, b, c);
+        }
+
+        // Method to find the maximum of three numbers
+        function findMaximum(a, b, c) {
+            return Math.max(a, b, c);
+        }
+
+        // Method to find the absolute value of a number
+        function findAbsoluteValue(x) {
+            return Math.abs(x);
+        }
+
+        // Sample calls to demonstrate the methods
+        const num1 = 10;
+        const num2 = -5;
+        const num3 = 15;
+
+        const minimum = findMinimum(num1, num2, num3);
+        const maximum = findMaximum(num1, num2, num3);
+        const absoluteValue = findAbsoluteValue(num2);
+
+        // Display the results
+        document.getElementById("minResult").textContent = `The minimum of ${num1}, ${num2}, and ${num3} is: ${minimum}`;
+        document.getElementById("maxResult").textContent = `The maximum of ${num1}, ${num2}, and ${num3} is: ${maximum}`;
+        document.getElementById("absResult").textContent = `The absolute value of ${num2} is: ${absoluteValue}`;
+    </script>
+</body>
+</html>

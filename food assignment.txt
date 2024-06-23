@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Suggestion App</title>
+</head>
+<body>
+    <h1>Food Suggestion App</h1>
+    <form id="foodForm">
+        <h2>Breakfast</h2>
+        <input type="text" id="breakfast1" placeholder="Enter breakfast food 1"><br>
+        <input type="text" id="breakfast2" placeholder="Enter breakfast food 2"><br>
+        <input type="text" id="breakfast3" placeholder="Enter breakfast food 3"><br>
+
+        <h2>Lunch</h2>
+        <input type="text" id="lunch1" placeholder="Enter lunch food 1"><br>
+        <input type="text" id="lunch2" placeholder="Enter lunch food 2"><br>
+        <input type="text" id="lunch3" placeholder="Enter lunch food 3"><br>
+
+        <h2>Dinner</h2>
+        <input type="text" id="dinner1" placeholder="Enter dinner food 1"><br>
+        <input type="text" id="dinner2" placeholder="Enter dinner food 2"><br>
+        <input type="text" id="dinner3" placeholder="Enter dinner food 3"><br>
+
+        <button type="button" onclick="suggestFood()">Suggest Food</button>
+    </form>
+
+    <h2>Suggested Food:</h2>
+    <p id="suggestion"></p>
+
+    <script>
+        function suggestFood() {
+            const breakfastFoods = [
+                document.getElementById("breakfast1").value,
+                document.getElementById("breakfast2").value,
+                document.getElementById("breakfast3").value
+            ];
+
+            const lunchFoods = [
+                document.getElementById("lunch1").value,
+                document.getElementById("lunch2").value,
+                document.getElementById("lunch3").value
+            ];
+
+            const dinnerFoods = [
+                document.getElementById("dinner1").value,
+                document.getElementById("dinner2").value,
+                document.getElementById("dinner3").value
+            ];
+
+            const allFoods = [...breakfastFoods, ...lunchFoods, ...dinnerFoods];
+            const randomFood = allFoods[Math.floor(Math.random() * allFoods.length)];
+
+            document.getElementById("suggestion").textContent = randomFood;
+        }
+    </script>
+</body>
+</html>
